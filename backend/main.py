@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from pathlib import Path
@@ -151,4 +152,13 @@ def download(job_id: str):
         job.pdf_path,
         media_type="application/pdf",
         filename="crossword.pdf",
+    )
+
+
+frontend_dir = Path(__file__).resolve().parent.parent / "frontend_dist"
+if frontend_dir.exists():
+    app.mount(
+        "/",
+        StaticFiles(directory=frontend_dir, html=True),
+        name="frontend",
     )

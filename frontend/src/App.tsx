@@ -8,7 +8,7 @@ function App() {
     if (!url) return
 
     const response = await fetch(
-      `http://localhost:8000/api/generate?url=${encodeURIComponent(url)}`,
+      `/api/generate?url=${encodeURIComponent(url)}`,
       { method: 'POST' }
     )
     if (!response.ok) throw new Error('Failed to start crossword generation')
@@ -61,7 +61,7 @@ function App() {
 
   async function checkProgress(jobId: string) {
     const response = await fetch(
-      `http://localhost:8000/api/progress/${jobId}`
+      `/api/progress/${jobId}`
     )
     if (!response.ok) throw new Error('Failed to check crossword progress')
     const progress = await response.json()
@@ -71,7 +71,7 @@ function App() {
 
   async function downloadPDF(jobId: string) {
     const response = await fetch(
-      `http://localhost:8000/api/download/${jobId}`
+      `/api/download/${jobId}`
     )
     if (!response.ok) throw new Error('Failed to download crossword PDF')
 
