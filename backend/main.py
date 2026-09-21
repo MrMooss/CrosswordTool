@@ -4,6 +4,7 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from pathlib import Path
+import os
 import tempfile
 import threading
 import uuid
@@ -13,14 +14,28 @@ from .svg_to_pdf import svg_to_pdf
 
 app = FastAPI()
 
+frontend_origins = [
+    origin.strip()
+    for origin in os.getenv(
+        "FRONTEND_ORIGIN",
+        "http://localhost:5173",
+    ).split(",")
+    if origin.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=frontend_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 jobs = {}
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
 
 class Job:
     def __init__(self):
