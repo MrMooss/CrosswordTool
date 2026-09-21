@@ -1,8 +1,8 @@
+import base64
+from pathlib import Path
+
 import requests
-import tempfile
 from bs4 import BeautifulSoup
-from svglib.svglib import svg2rlg 
-from reportlab.graphics import renderPDF
 from playwright.sync_api import sync_playwright
 
 class Crossword:
@@ -14,24 +14,6 @@ class Crossword:
 
         self.response = response
         self.cell_size = 30
-
-    def save_svg(self, svg):
-        """
-        Save the SVG content to a file.
-
-        Args:
-            svg (BeautifulSoup): The SVG content.
-            filename (str): The name of the file to save the SVG content to.
-        """
-        with tempfile.NamedTemporaryFile(
-            mode="w",
-            suffix=".svg",
-            delete=False,
-            encoding="utf-8"
-        ) as tmp:
-            tmp.write(str(svg))
-            tmp_path = tmp.name
-        print(tmp_path)
 
 
     def save_pdf(self, svg, filename="crossword.pdf"):
@@ -105,6 +87,7 @@ class Crossword:
         for text in svg.find_all("text", class_="cx-c"):
             text.decompose()
 
+        
         # új számok megtervezése
         number_places = self._plan_number_places()
 
@@ -116,7 +99,8 @@ class Crossword:
                     "class": "cx-c",
                     "x": str(x),
                     "y": str(y),
-                    "dy": "lem"
+                    "dy": "1em",
+                    "font-family": "Arial"
                 }
             )
             text.string = number
@@ -238,7 +222,7 @@ class Crossword:
                 "text-anchor": "middle",
                 "dominant-baseline": "middle",
                 "font-size": "40px",
-                "font-family": "sans-serif",
+                "font-family": "Arial",
                 "font-weight": "bold",
             }
         )
@@ -349,40 +333,50 @@ class Crossword:
             if number_type == "a":
                 coll, index = self._find_collision(number_places, row, col-1)
                 if coll:
-                    number_place = number_places[index]
-                    number_places[index] = (number_place[0], number_place[1], number_place[2], number_place[3]+5, number_place[4])
-                    number_places.append((number_value, row, col-1, x-30, y+26))
+                    if len(number_value) == 1:
+                        number_place = number_places[index]
+                        number_places[index] = (number_place[0], number_place[1], number_place[2], number_place[3]+5, number_place[4])
+                        number_places.append((number_value, row, col-1, x-30, y+6))
+                    else:
+                        number_place = number_places[index]
+                        number_places[index] = (number_place[0], number_place[1], number_place[2], number_place[3]-10, number_place[4]+5)
+                        number_places.append((number_value, row, col-1, x-30, y+10))
                 else:
                     if len(number_value) == 1:
-                        number_places.append((number_value, row, col-1, x-15, y+21))
+                        number_places.append((number_value, row, col-1, x-15, y))
                     else:
-                        number_places.append((number_value, row, col-1, x-30, y+21))
+                        number_places.append((number_value, row, col-1, x-30, y))
             elif number_type == "d":
                 coll, index = self._find_collision(number_places, row-1, col)
                 if coll:
-                    number_place = number_places[index]
-                    number_places[index] = (number_place[0], number_place[1], number_place[2], number_place[3], number_place[4]-2)
-                    number_places.append((number_value, row-1, col, x-2, y-2))
+                    if len(number_value) == 1:
+                        number_place = number_places[index]
+                        number_places[index] = (number_place[0], number_place[1], number_place[2], number_place[3], number_place[4]-2)
+                        number_places.append((number_value, row-1, col, x-2, y-12))
+                    else:
+                        number_place = number_places[index]
+                        number_places[index] = (number_place[0], number_place[1], number_place[2], number_place[3], number_place[4]-15)
+                        number_places.append((number_value, row-1, col, x-15, y-25))
                 else:
                     if len(number_value) == 1:
-                        number_places.append((number_value, row-1, col, x+7, y-6))
+                        number_places.append((number_value, row-1, col, x+7, y-27))
                     else:
-                        number_places.append((number_value, row-1, col, x+1, y-6))
+                        number_places.append((number_value, row-1, col, x+1, y-27))
             elif number_type == "b":
                 coll, index = self._find_collision(number_places, row-1, col)
                 if coll:
-                    number_places.append((number_value, row-1, col, x-26, y-7))
+                    number_places.append((number_value, row-1, col, x-26, y-28))
                 else:
                     if (row-1, col-1) in cells:
                         if len(number_value) == 1:
-                            number_places.append((number_value, row-1, col, x, y-7))
+                            number_places.append((number_value, row-1, col, x, y-28))
                         else:
-                            number_places.append((number_value, row-1, col, x, y-7))
+                            number_places.append((number_value, row-1, col, x, y-28))
                     else:
                         if len(number_value) == 1:
-                            number_places.append((number_value, row-1, col, x-10, y-7))
+                            number_places.append((number_value, row-1, col, x-10, y-28))
                         else:
-                            number_places.append((number_value, row-1, col, x-20, y-7))
+                            number_places.append((number_value, row-1, col, x-20, y-28))
         return number_places
 
     def _find_collision(self, number_places, row, col):

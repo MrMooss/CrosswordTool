@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+.input-container input {
+  width: 100%;
+  padding: 12px;
+  box-sizing: border-box;
+}
+
+.generate-button {
+  padding: 12px 20px;
+  cursor: pointer;
+}
+
+#progress-bar {
+  width: 100%;
+  margin-top: 24px;
+}

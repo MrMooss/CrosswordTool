@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 import threading
 
-from move_numbers import Crossword
+from forntend.move_numbers import Crossword
 
 
 class CrosswordApp:
